@@ -16,6 +16,8 @@ export default function Home({username, repos = []}) {
     let arrLanguages = {}
     const fuse = new Fuse(repos, {
         includeScore: true,
+        minMatchCharLength: 2,
+        threshold: 0.3,
         keys: [
             {
                 name: 'full_name',
@@ -81,7 +83,7 @@ export default function Home({username, repos = []}) {
                     <div className="h-full w-full flex items-center px-5">
                         <div className="flex flex-none">
                             <span className="text-white cursor-pointer">
-                                <a href={githubUrl}>
+                                <a target="_blank" href={githubUrl} rel="noreferrer">
                                     <SvgIcon name="github" size={32}/>
                                 </a>
                             </span>
@@ -90,13 +92,13 @@ export default function Home({username, repos = []}) {
                                     <a target="_blank" href={`${githubUrl}/pulls`} rel="noreferrer">Pull requests</a>
                                 </li>
                                 <li>
-                                    <a target="_blank">Issues</a>
+                                    <a target="_blank" href={`${githubUrl}/issues`} rel="noreferrer">Issues</a>
                                 </li>
                                 <li>
-                                    <a target="_blank">Marketplace</a>
+                                    <a target="_blank" href={`${githubUrl}/marketplace`} rel="noreferrer">Marketplace</a>
                                 </li>
                                 <li>
-                                    <a target="_blank">Explore</a>
+                                    <a target="_blank" href={`${githubUrl}/explore`} rel="noreferrer">Explore</a>
                                 </li>
                             </ul>
                         </div>
@@ -106,11 +108,7 @@ export default function Home({username, repos = []}) {
                         </div>
                         <div className="flex flex-none">
                             <span className="text-white cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                     stroke="currentColor" className="h-6 w-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                          d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
+                                 <SvgIcon name="account" size={24}/>
                             </span>
                         </div>
                     </div>
@@ -124,15 +122,19 @@ export default function Home({username, repos = []}) {
                 <div className="flex">
                     <div className="flex flex-row md:container mx-auto my-10" style={{maxWidth: 1024}}>
                         <div className="w-3/4 overflow-x-hidden pr-10">
-                            <div className="flex flex-row justify-around">
-                                <div className="flex w-1/2">
-                                    <Search onChange={debouncedOnSearch} />
+                            <div className="flex flex-col">
+                                <div className="flex flex-row justify-around">
+                                    <div className="flex w-1/2">
+                                        <Search onChange={debouncedOnSearch} />
+                                    </div>
+                                    <div className="flex w-1/2">
+                                        <Select className="justify-end" />
+                                    </div>
                                 </div>
-                                <div className="flex w-1/2">
-                                    <Select className="justify-end" />
-                                </div>
+                                <span style={{color: '#8b949e'}} className="text-sm mt-5">Total {data.length || 0} repositories</span>
                             </div>
-                            <div className="mt-10">
+
+                            <div className="mt-5">
                                 <ul>
                                     {
                                         data && data.length ? data.map((repo, key) => {
@@ -140,7 +142,9 @@ export default function Home({username, repos = []}) {
 
                                             return (
                                                 <li key={key} className="space-y-3 border-t border-gray-600 py-5">
-                                                    <h3 className="text-xl"><a href={html_url} target="_blank" style={{color: '#58a6ff'}} rel="noreferrer">{full_name.replace('/', ' / ')}</a></h3>
+                                                    <h3 className="text-xl">
+                                                        <a className="hover:underline" href={html_url} target="_blank" style={{color: '#58a6ff'}} rel="noreferrer">{full_name.replace('/', ' / ')}</a>
+                                                    </h3>
                                                     <p className="text-sm" style={{color: '#8b949e'}}>{description}</p>
                                                     <div className="flex flex-row w-full justify-between">
                                                         <ul className="flex flex-row space-x-4 text-sm items-center" style={{color: '#8b949e'}}>
@@ -164,7 +168,7 @@ export default function Home({username, repos = []}) {
                                                                 </a>
                                                             </li>
                                                         </ul>
-                                                        <span style={{color: '#8b949e'}} className="text-xs justify-end">Starred {moment(updated_at).toNow()}</span>
+                                                        <span style={{color: '#8b949e'}} className="text-xs justify-end">Updated {moment(updated_at).fromNow()}</span>
                                                     </div>
                                                     <div className="flex flex-wrap">
                                                         {
