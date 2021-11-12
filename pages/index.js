@@ -1,6 +1,9 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState, useMemo} from "react";
 import Head from 'next/head'
 import axios from 'axios';
+import Fuse from 'fuse.js'
+import moment from 'moment';
+import {debounce} from "lodash";
 
 import Search from "Components/Search";
 import Select from "Components/Select"
@@ -8,8 +11,29 @@ import {SvgIcon} from "Components/SvgDefinition";
 
 export default function Home({username, repos = []}) {
     const githubUrl = 'https://github.com'
-    const repo = `github:repo:${username}`
+    const [data, setData] = useState([]);
+
     let arrLanguages = {}
+    const fuse = new Fuse(repos, {
+        includeScore: true,
+        keys: [
+            {
+                name: 'full_name',
+                weight: 3
+            },
+            {
+                name: 'description',
+                weight: 2
+            },
+            {
+                name: 'topics'
+            },
+            {
+                name: 'language'
+            }
+        ]
+
+    })
 
     if (repos && repos.length) {
         repos.map((repo) => {
@@ -21,14 +45,29 @@ export default function Home({username, repos = []}) {
         })
     }
 
-    console.log('arrLanguages', arrLanguages)
-
     useEffect(() => {
-
-
+        setData(repos)
     }, [repos])
 
-    console.log('repos', repos)
+    const onSearch = (e) => {
+        if (e.target.value) {
+            const result = fuse.search(e.target.value)
+
+            if (result && result.length) {
+                const dataSearch = result.map((repo) => {
+                    return repo.item;
+                })
+
+                setData(dataSearch)
+            } else {
+                setData([])
+            }
+        } else {
+            setData(repos)
+        }
+    }
+
+    const debouncedOnSearch = useMemo(() => debounce(onSearch, 500),[]);
 
     return (
         <div className="text-white">
@@ -84,26 +123,26 @@ export default function Home({username, repos = []}) {
                 </div>
                 <div className="flex">
                     <div className="flex flex-row md:container mx-auto my-10" style={{maxWidth: 1024}}>
-                        <div className="w-3/4 overflow-x-hidden">
+                        <div className="w-3/4 overflow-x-hidden pr-10">
                             <div className="flex flex-row justify-around">
                                 <div className="flex w-1/2">
-                                    <Search />
+                                    <Search onChange={debouncedOnSearch} />
                                 </div>
                                 <div className="flex w-1/2">
-                                    <Select />
+                                    <Select className="justify-end" />
                                 </div>
                             </div>
-                            <div className="mt-10 pr-10">
+                            <div className="mt-10">
                                 <ul>
                                     {
-                                        repos && repos.length ? repos.map((repo, key) => {
-                                            const {name = "", description = "", html_url = "", forks_count, stargazers_count, topics, language} = repo;
+                                        data && data.length ? data.map((repo, key) => {
+                                            const {full_name = "", description = "", html_url = "", forks_count, stargazers_count, topics, language, updated_at} = repo;
 
                                             return (
                                                 <li key={key} className="space-y-3 border-t border-gray-600 py-5">
-                                                    <h3 className="text-xl"><a href={html_url} target="_blank" style={{color: '#58a6ff'}} rel="noreferrer">{name}</a></h3>
+                                                    <h3 className="text-xl"><a href={html_url} target="_blank" style={{color: '#58a6ff'}} rel="noreferrer">{full_name.replace('/', ' / ')}</a></h3>
                                                     <p className="text-sm" style={{color: '#8b949e'}}>{description}</p>
-                                                    <div>
+                                                    <div className="flex flex-row w-full justify-between">
                                                         <ul className="flex flex-row space-x-4 text-sm items-center" style={{color: '#8b949e'}}>
                                                             {
                                                                 language ? (
@@ -125,6 +164,7 @@ export default function Home({username, repos = []}) {
                                                                 </a>
                                                             </li>
                                                         </ul>
+                                                        <span style={{color: '#8b949e'}} className="text-xs justify-end">Starred {moment(updated_at).toNow()}</span>
                                                     </div>
                                                     <div className="flex flex-wrap">
                                                         {
