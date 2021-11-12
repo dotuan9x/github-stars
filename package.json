@@ -8,6 +8,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "axios": "^0.24.0",
     "compression": "1.7.4",
     "dotenv": "10.0.0",
     "fuse.js": "^6.4.6",
