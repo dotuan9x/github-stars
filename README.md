@@ -1,12 +1,6 @@
-# github-stars
-Listing and filter github repository
+# GitHub stars
+Lightweight fuzzy search GitHub stars repository
 
-API Github Star repository by username: https://api.github.com/users/dotuan9x/starred
+Use GitHub open-source api `https://api.github.com/users/{username}/starred` for get all GitHub stars repository of user.
 
 
-Todo lists
-
-- [ ] Listing (Grid/listing) and user can filter github star repository
-- [ ] User can add description, label (React, Nodejs,...)
-- [ ] Search frontend https://github.com/krisk/Fuse
-- [ ] Use firebase to save custom star github repository from chrome extension or input field
